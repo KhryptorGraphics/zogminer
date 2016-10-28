@@ -215,6 +215,7 @@ private:
 		return 1;
 	}
 	cl::Context m_context;
+	cl::Context m_context2;
 	cl::CommandQueue m_queue;
 	cl::CommandQueue m_queue2;
 	std::vector<cl::Kernel> m_zogKernels;

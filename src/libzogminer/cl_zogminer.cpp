@@ -321,8 +321,9 @@ bool cl_zogminer::init(
 
 		// create context
 		m_context = cl::Context(vector<cl::Device>(&device, &device + 1));
+		m_context2 = cl::Context(vector<cl::Device>(&device, &device + 1));
 		m_queue = cl::CommandQueue(m_context, device);
-		m_queue2 = cl::CommandQueue(m_context, device);
+		m_queue2 = cl::CommandQueue(m_context2, device);
 
 		// make sure that global work size is evenly divisible by the local workgroup size
 		m_globalWorkSize = s_initialGlobalWorkSize;
@@ -350,6 +351,7 @@ bool cl_zogminer::init(
 		sources.push_back({ code.c_str(), code.size() });
 
 		cl::Program program(m_context, sources);
+		cl::Program program2(m_context2, sources);
 		try
 		{
 			program.build({ device });
@@ -361,12 +363,23 @@ bool cl_zogminer::init(
 			CL_LOG(program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device).c_str());
 			return false;
 		}
+		try
+		{
+			program2.build({ device });
+			CL_LOG("Printing program log");
+			CL_LOG(program2.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device).c_str());
+		}
+		catch (cl::Error const&)
+		{
+			CL_LOG(program2.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device).c_str());
+			return false;
+		}
 
 		try
 		{
 			for (auto & _kernel : _kernels){
 				m_zogKernels.push_back(cl::Kernel(program, _kernel.c_str()));
-				m_zogKernels2.push_back(cl::Kernel(program, _kernel.c_str()));
+				m_zogKernels2.push_back(cl::Kernel(program2, _kernel.c_str()));
 			}
 
 		}
@@ -378,17 +391,17 @@ bool cl_zogminer::init(
 
 		// TODO create buffer kernel inputs (private variables)
 	  	buf_dbg = cl::Buffer(m_context, CL_MEM_READ_WRITE, dbg_size, NULL, NULL);
-	  	buf_dbg2 = cl::Buffer(m_context, CL_MEM_READ_WRITE, dbg_size, NULL, NULL);
+	  	buf_dbg2 = cl::Buffer(m_context2, CL_MEM_READ_WRITE, dbg_size, NULL, NULL);
 		//TODO Dangger
 		m_queue.enqueueFillBuffer(buf_dbg, &zero, 1, 0, dbg_size, 0);
 		m_queue2.enqueueFillBuffer(buf_dbg2, &zero, 1, 0, dbg_size, 0);
 
 		buf_ht[0] = cl::Buffer(m_context, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
-		buf_ht2[0] = cl::Buffer(m_context, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
+		buf_ht2[0] = cl::Buffer(m_context2, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
 		buf_ht[1] = cl::Buffer(m_context, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
-		buf_ht2[1] = cl::Buffer(m_context, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
+		buf_ht2[1] = cl::Buffer(m_context2, CL_MEM_READ_WRITE, HT_SIZE, NULL, NULL);
 		buf_sols = cl::Buffer(m_context, CL_MEM_READ_WRITE, sizeof (sols_t), NULL, NULL);
-		buf_sols2 = cl::Buffer(m_context, CL_MEM_READ_WRITE, sizeof (sols_t), NULL, NULL);
+		buf_sols2 = cl::Buffer(m_context2, CL_MEM_READ_WRITE, sizeof (sols_t), NULL, NULL);
 
 		m_queue.finish();
 		m_queue2.finish();
@@ -445,7 +458,7 @@ void cl_zogminer::run(uint8_t *header,
 		zcash_blake2b_init(&blake2, ZCASH_HASH_LEN, PARAM_N, PARAM_K);
 		zcash_blake2b_update(&blake2, header, 128, 0);
 		buf_blake_st = cl::Buffer(m_context, CL_MEM_READ_ONLY, sizeof (blake.h), NULL, NULL);
-		buf_blake_st2 = cl::Buffer(m_context, CL_MEM_READ_ONLY, sizeof (blake.h), NULL, NULL);
+		buf_blake_st2 = cl::Buffer(m_context2, CL_MEM_READ_ONLY, sizeof (blake.h), NULL, NULL);
 		m_queue.enqueueWriteBuffer(buf_blake_st, true, 0, sizeof(blake.h), blake.h);
 		m_queue2.enqueueWriteBuffer(buf_blake_st2, true, 0, sizeof(blake.h), blake.h);
 
