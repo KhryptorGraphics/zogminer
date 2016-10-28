@@ -94,7 +94,14 @@ public:
 		std::vector<std::string> _kernels
 	);
 
-	void run(uint8_t *header, size_t header_len, uint64_t nonce, sols_t * indices, uint32_t * n_sol, uint64_t * ptr);
+	void run(uint8_t *header, 
+			 size_t header_len, 
+			 uint64_t nonce, 
+			 uint64_t nonce2, 
+			 sols_t * indices, 
+			 uint32_t * n_sol, 
+			 uint64_t * ptr,
+			 uint64_t * ptr2);
 
 	void finish();
 
@@ -209,7 +216,9 @@ private:
 	}
 	cl::Context m_context;
 	cl::CommandQueue m_queue;
+	cl::CommandQueue m_queue2;
 	std::vector<cl::Kernel> m_zogKernels;
+	std::vector<cl::Kernel> m_zogKernels2;
 	/*cl::Buffer m_digests[2];
 	cl::Buffer m_buckets;
 	cl::Buffer m_new_digest_index;
@@ -217,16 +226,23 @@ private:
 	cl::Buffer m_dst_solutions;
 	cl::Buffer m_n_solutions;*/
 	cl::Buffer buf_ht[2];
+	cl::Buffer buf_ht2[2];
 	cl::Buffer buf_sols;
+	cl::Buffer buf_sols2;
 	cl::Buffer buf_dbg;
+	cl::Buffer buf_dbg2;
 
 	uint64_t		nonce;
+	uint64_t		nonce2;
     uint64_t		total;
+    uint64_t		total2;
 	size_t dbg_size = 1 * sizeof (debug_t);	
 
 	const cl_int zero = 0;
 	uint32_t solutions;
+	uint32_t solutions2;
 	uint32_t * dst_solutions;
+	uint32_t * dst_solutions2;
 
 	unsigned m_globalWorkSize;
 	bool m_openclOnePointOne;

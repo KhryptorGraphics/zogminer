@@ -67,10 +67,15 @@ public:
 	GPUSolver();
 	GPUSolver(int64_t selGPU);
 	~GPUSolver();
-        bool run(unsigned int n, unsigned int k, uint8_t *header, size_t header_len, uint64_t nonce,
-		            const std::function<bool(std::vector<unsigned char>)> validBlock,
-				const std::function<bool(GPUSolverCancelCheck)> cancelled,
-			crypto_generichash_blake2b_state base_state);
+        bool run(unsigned int n, 
+        		 unsigned int k, 
+        		 uint8_t *header, 
+        		 size_t header_len, 
+        		 uint64_t nonce,
+        		 uint64_t nonce2,
+		         const std::function<bool(std::vector<unsigned char>)> validBlock,
+				 const std::function<bool(GPUSolverCancelCheck)> cancelled,
+				 crypto_generichash_blake2b_state base_state);
 
 private:
 	cl_zogminer * miner;
@@ -85,10 +90,13 @@ private:
 	float sum = 0.f;
 	float avg = 0.f;
 
-	bool GPUSolve200_9(uint8_t *header, size_t header_len, uint64_t nonce,
-		         	const std::function<bool(std::vector<unsigned char>)> validBlock,
-				const std::function<bool(GPUSolverCancelCheck)> cancelled,
-			crypto_generichash_blake2b_state base_state);
+	bool GPUSolve200_9(uint8_t *header, 
+					   size_t header_len, 
+					   uint64_t nonce,
+					   uint64_t nonce2,
+		         	   const std::function<bool(std::vector<unsigned char>)> validBlock,
+				       const std::function<bool(GPUSolverCancelCheck)> cancelled,
+			           crypto_generichash_blake2b_state base_state);
 
 };
 

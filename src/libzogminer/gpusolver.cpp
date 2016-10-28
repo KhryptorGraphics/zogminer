@@ -150,23 +150,31 @@ GPUSolver::~GPUSolver() {
 
 }
 
-bool GPUSolver::run(unsigned int n, unsigned int k, uint8_t *header, size_t header_len, uint64_t nonce,
+bool GPUSolver::run(unsigned int n, 
+					unsigned int k, 
+					uint8_t *header, 
+					size_t header_len, 
+					uint64_t nonce,
+					uint64_t nonce2,
 		            const std::function<bool(std::vector<unsigned char>)> validBlock,
-				const std::function<bool(GPUSolverCancelCheck)> cancelled,
-			crypto_generichash_blake2b_state base_state) {
+					const std::function<bool(GPUSolverCancelCheck)> cancelled,
+					crypto_generichash_blake2b_state base_state) {
 
     if (n == 200 && k == 9) {
-        return GPUSolve200_9(header, header_len, nonce, validBlock, cancelled, base_state);
+        return GPUSolve200_9(header, header_len, nonce, nonce2, validBlock, cancelled, base_state);
     } else {
         throw std::invalid_argument("Unsupported Equihash parameters");
     }
 
 }
 
-bool GPUSolver::GPUSolve200_9(uint8_t *header, size_t header_len, uint64_t nonce,
-                 	const std::function<bool(std::vector<unsigned char>)> validBlock,
-			const std::function<bool(GPUSolverCancelCheck)> cancelled,
-		crypto_generichash_blake2b_state base_state) {
+bool GPUSolver::GPUSolve200_9(uint8_t *header, 
+							  size_t header_len, 
+							  uint64_t nonce,
+							  uint64_t nonce2,
+                 			  const std::function<bool(std::vector<unsigned char>)> validBlock,
+							  const std::function<bool(GPUSolverCancelCheck)> cancelled,
+							  crypto_generichash_blake2b_state base_state) {
 
 	/* Run the kernel
 	TODO: Optimise and figure out how we want this to go
@@ -176,7 +184,8 @@ bool GPUSolver::GPUSolve200_9(uint8_t *header, size_t header_len, uint64_t nonce
 	if(GPU && initOK) {
         auto t = std::chrono::high_resolution_clock::now();
 		uint64_t ptr;
-    	miner->run(header, header_len, nonce, indices, &n_sol, &ptr);
+		uint64_t ptr2;
+    	miner->run(header, header_len, nonce, nonce2, indices, &n_sol, &ptr, &ptr2);
 
 		uint256 nNonce = ArithToUint256(ptr);
 			crypto_generichash_blake2b_update(&base_state,
