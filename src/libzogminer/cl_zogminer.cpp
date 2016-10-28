@@ -463,8 +463,8 @@ void cl_zogminer::run(uint8_t *header,
 			
 			if (!round) {
 				m_zogKernels[1+round].setArg(0, buf_blake_st);
-				m_zogKernels[1+round].setArg(0, buf_blake_st2);
-				m_zogKernels2[1+round].setArg(1, buf_ht[round % 2]);
+				m_zogKernels2[1+round].setArg(0, buf_blake_st2);
+				m_zogKernels[1+round].setArg(1, buf_ht[round % 2]);
 				m_zogKernels2[1+round].setArg(1, buf_ht2[round % 2]);
 				global_ws = select_work_size_blake();
 			} else {
